@@ -1,20 +1,17 @@
 // import { AppleMaps, GoogleMaps } from 'expo-maps';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Platform, Button } from 'react-native';
+import { StyleSheet, Text, View, Platform, Button, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
-import { LocationSubscriber } from 'expo-location/build/LocationSubscribers';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
-import { AppleMaps } from 'expo-maps';
 import * as AgeRange from 'expo-age-range';
 
 export default function App() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null)
-  const [expoPushToken, setExpoPushToken] = useState('');
-  const [channels, setChannels] = useState<Notifications.NotificationChannel[]>([]);
-  const [notification, setNotification] = useState<Notifications.Notification | undefined>(
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [, setExpoPushToken] = useState('');
+  const [, setChannels] = useState<Notifications.NotificationChannel[]>([]);
+  const [, setNotification] = useState<Notifications.Notification | undefined>(
     undefined
   );
   const [result, setResult] = useState(null);
@@ -28,26 +25,25 @@ export default function App() {
       });
       setResult(ageRange);
     } catch (error) {
-      console.log(error);
       setResult({ error: error.message });
     }
-  }
+  };
 
   const getUserLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      alert('Permission to access location was denied');
+      Alert.alert('Permission to access location was denied');
       return;
     }
 
     let location = await Location.getCurrentPositionAsync({});
     setLocation(location);
-  }
+  };
 
   useEffect(() => {
-    getUserLocation()
+    getUserLocation();
 
-  }, [])
+  }, []);
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => token && setExpoPushToken(token));
@@ -56,17 +52,15 @@ export default function App() {
       Notifications.getNotificationChannelsAsync().then(value => setChannels(value ?? []));
     }
     const notificationListener = Notifications.addNotificationReceivedListener(notification => {
-      console.log("Notification", notification)
       setNotification(notification);
     });
 
-    const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
-    });
+    // const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+    // });
 
     return () => {
       notificationListener.remove();
-      responseListener.remove();
+      // responseListener.remove();
     };
   }, []);
 
@@ -90,7 +84,7 @@ export default function App() {
         finalStatus = status;
       }
       if (finalStatus !== 'granted') {
-        alert('Failed to get push token for push notification!');
+        Alert.alert('Failed to get push token for push notification!');
         return;
       }
       // Learn more about projectId:
@@ -107,12 +101,11 @@ export default function App() {
             projectId,
           })
         ).data;
-        console.log(token);
       } catch (e) {
         token = `${e}`;
       }
     } else {
-      alert('Must use physical device for Push Notifications');
+      Alert.alert('Must use physical device for Push Notifications');
     }
 
     return token;
@@ -130,7 +123,7 @@ export default function App() {
         </Text>
       )}
     </View>
-  )
+  );
 
 }
 
